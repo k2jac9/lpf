@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AptosClient } from 'aptos';
-import { Server, Networks, TransactionBuilder, Operation, Account, BASE_FEE, Keypair } from '@stellar/stellar-sdk';
+import { Server as StellarServer, Networks, TransactionBuilder, Operation, Account, BASE_FEE, Keypair } from '@stellar/stellar-sdk';
 import { AptosTransaction, BlockchainNetwork } from '../types';
 
 interface BlockchainContextType {
@@ -21,7 +21,7 @@ const BlockchainContext = createContext<BlockchainContextType | undefined>(undef
 
 // Initialize blockchain clients
 const aptosClient = new AptosClient('https://fullnode.mainnet.aptoslabs.com/v1');
-const stellarServer = new Server('https://horizon.stellar.org');
+const stellarServer = new StellarServer('https://horizon.stellar.org');
 
 export const BlockchainProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
