@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AptosClient } from '@aptos-labs/ts-sdk';
-import { Account, CoinClient, TokenClient } from '@aptos-labs/ts-sdk';
+import { Provider, Network, Account, CoinClient, TokenClient } from '@aptos-labs/ts-sdk';
 import * as StellarSdk from '@stellar/stellar-sdk';
 import { AptosTransaction, BlockchainNetwork } from '../types';
 
@@ -21,7 +20,7 @@ interface BlockchainContextType {
 const BlockchainContext = createContext<BlockchainContextType | undefined>(undefined);
 
 // Initialize blockchain clients
-const aptosClient = new AptosClient({ nodeUrl: 'https://fullnode.mainnet.aptoslabs.com/v1' });
+const aptosClient = new Provider(Network.MAINNET);
 const stellarServer = new StellarSdk.Server('https://horizon.stellar.org');
 
 export const BlockchainProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -127,7 +126,7 @@ export const BlockchainProvider: React.FC<{ children: ReactNode }> = ({ children
     try {
       if (network === 'aptos') {
         // Verify on Aptos
-        const transaction = await aptosClient.getTransactionByHash(recordId);
+        const transaction = await aptosClient.getTransaction(recordId);
         return transaction.success;
       } else {
         // Verify on Stellar
@@ -143,7 +142,7 @@ export const BlockchainProvider: React.FC<{ children: ReactNode }> = ({ children
   const getVerificationStatus = async (transactionHash: string): Promise<AptosTransaction> => {
     try {
       if (network === 'aptos') {
-        const transaction = await aptosClient.getTransactionByHash(transactionHash);
+        const transaction = await aptosClient.getTransaction(transactionHash);
         return {
           hash: transactionHash,
           sender: transaction.sender,
