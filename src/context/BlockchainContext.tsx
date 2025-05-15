@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AptosClient } from 'aptos';
-import * as StellarSdk from '@stellar/stellar-sdk';
+import { Server, Networks, TransactionBuilder, Operation, Account, BASE_FEE, Keypair } from '@stellar/stellar-sdk';
 import { AptosTransaction, BlockchainNetwork } from '../types';
 
 interface BlockchainContextType {
@@ -21,7 +21,7 @@ const BlockchainContext = createContext<BlockchainContextType | undefined>(undef
 
 // Initialize blockchain clients
 const aptosClient = new AptosClient('https://fullnode.mainnet.aptoslabs.com/v1');
-const stellarServer = new StellarSdk.Server('https://horizon.stellar.org');
+const stellarServer = new Server('https://horizon.stellar.org');
 
 export const BlockchainProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
@@ -54,7 +54,7 @@ export const BlockchainProvider: React.FC<{ children: ReactNode }> = ({ children
         address = account.address;
       } else {
         // Connect to Stellar wallet
-        const keypair = StellarSdk.Keypair.random();
+        const keypair = Keypair.random();
         address = keypair.publicKey();
       }
       
@@ -95,14 +95,14 @@ export const BlockchainProvider: React.FC<{ children: ReactNode }> = ({ children
         return `0x${Array(64).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('')}`;
       } else {
         // Create record on Stellar blockchain
-        const transaction = new StellarSdk.TransactionBuilder(
-          new StellarSdk.Account(walletAddress, '0'),
+        const transaction = new TransactionBuilder(
+          new Account(walletAddress, '0'),
           {
-            fee: StellarSdk.BASE_FEE,
-            networkPassphrase: StellarSdk.Networks.PUBLIC,
+            fee: BASE_FEE,
+            networkPassphrase: Networks.PUBLIC,
           }
         )
-        .addOperation(StellarSdk.Operation.manageData({
+        .addOperation(Operation.manageData({
           name: `record_${type}_${Date.now()}`,
           value: content
         }))
