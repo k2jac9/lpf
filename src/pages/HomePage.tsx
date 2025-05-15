@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FileCheck, Database, Search, Shield, ArrowRight } from 'lucide-react';
+import { FileCheck, Database, Search, Shield, ArrowRight, Scale, Github, Mail, Twitter } from 'lucide-react';
 import MainLayout from '../components/layout/MainLayout';
 import Button from '../components/shared/Button';
 
@@ -12,10 +12,10 @@ const HomePage: React.FC = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Verifiable Legal Reviews on the Blockchain
+              Trusted Records Hub
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-primary-100">
-              Establish trust and transparency in legal reviews with immutable blockchain verification.
+              Verifiable professional reviews for legal professionals powered by blockchain technology.
             </p>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
               <Button 
@@ -45,7 +45,7 @@ const HomePage: React.FC = () => {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose LegalVerify</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose Trusted Records Hub</h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               Our platform provides the tools legal professionals need to create verifiable and transparent reviews.
             </p>
@@ -59,7 +59,7 @@ const HomePage: React.FC = () => {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Immutable Records</h3>
               <p className="text-gray-600">
-                All reviews are permanently recorded on the Aptos blockchain, ensuring they cannot be altered or deleted.
+                All reviews are permanently recorded on the Aptos and Stellar blockchain, ensuring they cannot be altered or deleted.
               </p>
             </div>
             
@@ -164,7 +164,7 @@ const HomePage: React.FC = () => {
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">What Legal Professionals Say</h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Hear from other legal professionals who are already using LegalVerify.
+              Hear from other legal professionals who are already using Trusted Records Hub.
             </p>
           </div>
           
@@ -183,7 +183,7 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
               <p className="text-gray-700 italic">
-                "LegalVerify has revolutionized how I provide expert opinions. My clients appreciate the added layer of trust that blockchain verification provides."
+                "Trusted Records Hub has revolutionized how I provide expert opinions. My clients appreciate the added layer of trust that blockchain verification provides."
               </p>
             </div>
             
@@ -219,7 +219,7 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
               <p className="text-gray-700 italic">
-                "LegalVerify has streamlined our compliance reviews and created an immutable audit trail that has simplified our regulatory reporting requirements."
+                "Trusted Records Hub has streamlined our compliance reviews and created an immutable audit trail that has simplified our regulatory reporting requirements."
               </p>
             </div>
           </div>
