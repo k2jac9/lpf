@@ -1,16 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FileCheck, CheckCircle, Clock, AlertCircle, Plus, ChevronRight, BarChart3, ArrowUp, ArrowDown } from 'lucide-react';
+import { FileCheck, CheckCircle, Clock, AlertCircle, Plus, ChevronRight, BarChart3, ArrowUp, Wifi, WifiOff } from 'lucide-react';
 import MainLayout from '../components/layout/MainLayout';
 import Card from '../components/shared/Card';
 import Button from '../components/shared/Button';
+import Badge from '../components/shared/Badge';
+import ErrorDisplay from '../components/shared/ErrorDisplay';
 import ReviewCard from '../components/reviews/ReviewCard';
 import { useReviews } from '../context/ReviewContext';
 import { useAuth } from '../context/AuthContext';
+import { useBlockchain } from '../context/BlockchainContext';
 
 const DashboardPage: React.FC = () => {
-  const { reviews, userReviews } = useReviews();
+  const { reviews, userReviews, error: reviewError } = useReviews();
   const { user } = useAuth();
+  const { isInitialized, isConnected, error: blockchainError, walletAddress, network } = useBlockchain();
   
   // Calculate review statistics
   const totalReviews = userReviews.length;
@@ -23,6 +27,9 @@ const DashboardPage: React.FC = () => {
     (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
   ).slice(0, 3);
   
+  // Determine which errors to display
+  const displayErrors = [reviewError, blockchainError].filter(Boolean);
+  
   return (
     <MainLayout>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -34,6 +41,63 @@ const DashboardPage: React.FC = () => {
           <p className="text-gray-600">
             Your dashboard provides an overview of your reviews and verification status.
           </p>
+        </div>
+        
+        {/* Error display */}
+        {displayErrors.length > 0 && (
+          <div className="mb-8 space-y-4">
+            {displayErrors.map((error, index) => (
+              <ErrorDisplay
+                key={index}
+                error={error!}
+                title="System Error"
+              />
+            ))}
+          </div>
+        )}
+        
+        {/* Blockchain status banner */}
+        <div className="mb-8">
+          <Card className="bg-gradient-to-r from-primary-50 to-blue-50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                {isInitialized ? (
+                  <Wifi className="h-6 w-6 text-green-500" />
+                ) : (
+                  <WifiOff className="h-6 w-6 text-red-500" />
+                )}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Blockchain Status
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {isInitialized ? (
+                      isConnected ? (
+                        `Connected to ${network.toUpperCase()} (${walletAddress?.substring(0, 8)}...)`
+                      ) : (
+                        `Ready to connect to ${network.toUpperCase()}`
+                      )
+                    ) : (
+                      'Initializing blockchain connection...'
+                    )}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Badge 
+                  variant={isInitialized ? (isConnected ? 'success' : 'warning') : 'error'}
+                  size="sm"
+                >
+                  {isInitialized ? (isConnected ? 'Connected' : 'Ready') : 'Initializing'}
+                </Badge>
+                {isInitialized && (
+                  <Badge variant="info" size="sm">
+                    {network.toUpperCase()}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </Card>
         </div>
         
         {/* Stats cards */}

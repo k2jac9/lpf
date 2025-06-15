@@ -1,35 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/shared/Button';
 import Input from '../components/shared/Input';
 import Card from '../components/shared/Card';
+import ErrorDisplay from '../components/shared/ErrorDisplay';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, error, clearError, isAuthenticated } = useAuth();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [formError, setFormError] = useState('');
+  
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
+  
+  // Clear errors when form changes
+  useEffect(() => {
+    if (error || formError) {
+      clearError();
+      setFormError('');
+    }
+  }, [email, password, clearError]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setFormError('');
     
     if (!email || !password) {
-      setError('Please enter both email and password');
+      setFormError('Please enter both email and password');
+      return;
+    }
+    
+    if (!email.includes('@')) {
+      setFormError('Please enter a valid email address');
       return;
     }
     
     try {
       await login(email, password);
-      navigate('/dashboard');
+      // Navigation will happen automatically due to useEffect above
     } catch (err) {
-      setError('Invalid email or password');
+      // Error is already set in context, no need to handle here
+      console.error('Login failed:', err);
     }
   };
+
+  const displayError = error || formError;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -54,10 +78,17 @@ const LoginPage: React.FC = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <Card className="py-8 px-4 sm:px-10">
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md flex items-center text-red-700">
-              <AlertCircle className="h-5 w-5 mr-2" />
-              {error}
+          {displayError && (
+            <div className="mb-4">
+              <ErrorDisplay
+                error={displayError}
+                title="Login Failed"
+                onDismiss={() => {
+                  clearError();
+                  setFormError('');
+                }}
+                size="sm"
+              />
             </div>
           )}
           
@@ -69,8 +100,9 @@ const LoginPage: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               leftIcon={<Mail className="h-5 w-5" />}
-              placeholder="you@example.com"
+              placeholder="jane.doe@legalfirm.com"
               required
+              disabled={isLoading}
             />
             
             <Input
@@ -80,8 +112,9 @@ const LoginPage: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               leftIcon={<Lock className="h-5 w-5" />}
-              placeholder="••••••••"
+              placeholder="password"
               required
+              disabled={isLoading}
             />
             
             <div className="flex items-center justify-between">
@@ -91,6 +124,7 @@ const LoginPage: React.FC = () => {
                   name="remember-me"
                   type="checkbox"
                   className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                  disabled={isLoading}
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
                   Remember me
@@ -111,6 +145,7 @@ const LoginPage: React.FC = () => {
                 fullWidth
                 size="lg"
                 isLoading={isLoading}
+                disabled={isLoading}
               >
                 Sign in
               </Button>
@@ -128,7 +163,7 @@ const LoginPage: React.FC = () => {
             </div>
 
             <div className="mt-6 grid grid-cols-1 gap-3">
-              <Button variant="outline" fullWidth>
+              <Button variant="outline" fullWidth disabled={isLoading}>
                 <img
                   className="h-5 w-5 mr-2"
                   src="https://cdn-icons-png.flaticon.com/512/281/281764.png"
@@ -137,6 +172,14 @@ const LoginPage: React.FC = () => {
                 Sign in with Google
               </Button>
             </div>
+          </div>
+
+          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
+            <p className="text-sm text-blue-800 font-medium mb-2">Demo Credentials:</p>
+            <p className="text-xs text-blue-700">
+              Email: jane.doe@legalfirm.com<br />
+              Password: password
+            </p>
           </div>
         </Card>
       </div>

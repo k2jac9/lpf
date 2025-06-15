@@ -6,15 +6,18 @@ import MainLayout from '../components/layout/MainLayout';
 import Button from '../components/shared/Button';
 import Card from '../components/shared/Card';
 import Badge from '../components/shared/Badge';
+import ErrorDisplay from '../components/shared/ErrorDisplay';
 import VerificationStatus from '../components/verification/VerificationStatus';
 import { useReviews } from '../context/ReviewContext';
 import { useAuth } from '../context/AuthContext';
+import { useBlockchain } from '../context/BlockchainContext';
 
 const ReviewDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getReview, verifyReviewOnBlockchain, deleteReview, isLoading } = useReviews();
+  const { getReview, verifyReviewOnBlockchain, deleteReview, isLoading, error: reviewError } = useReviews();
   const { user } = useAuth();
+  const { error: blockchainError } = useBlockchain();
   
   const review = id ? getReview(id) : undefined;
   
@@ -22,6 +25,7 @@ const ReviewDetailPage: React.FC = () => {
   const [verificationError, setVerificationError] = useState<string | null>(null);
   const [verificationSuccess, setVerificationSuccess] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   
   if (!review) {
     return (
@@ -47,13 +51,15 @@ const ReviewDetailPage: React.FC = () => {
     
     setIsVerifying(true);
     setVerificationError(null);
+    setVerificationSuccess(false);
     
     try {
       await verifyReviewOnBlockchain(id);
       setVerificationSuccess(true);
     } catch (error) {
       console.error('Verification error:', error);
-      setVerificationError('Failed to verify review on blockchain. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to verify review on blockchain. Please try again.';
+      setVerificationError(errorMessage);
     } finally {
       setIsVerifying(false);
     }
@@ -64,13 +70,15 @@ const ReviewDetailPage: React.FC = () => {
     
     if (window.confirm('Are you sure you want to delete this review? This action cannot be undone.')) {
       setIsDeleting(true);
+      setDeleteError(null);
       
       try {
         await deleteReview(id);
         navigate('/reviews');
       } catch (error) {
         console.error('Delete error:', error);
-        alert('Failed to delete review. Please try again.');
+        const errorMessage = error instanceof Error ? error.message : 'Failed to delete review. Please try again.';
+        setDeleteError(errorMessage);
         setIsDeleting(false);
       }
     }
@@ -91,6 +99,14 @@ const ReviewDetailPage: React.FC = () => {
     'private': 'Private',
     'organization': 'Organization'
   };
+
+  // Determine which errors to display
+  const displayErrors = [
+    reviewError,
+    blockchainError,
+    verificationError,
+    deleteError
+  ].filter(Boolean);
 
   return (
     <MainLayout>
@@ -125,12 +141,30 @@ const ReviewDetailPage: React.FC = () => {
                   leftIcon={<Trash2 className="h-4 w-4" />}
                   onClick={handleDelete}
                   isLoading={isDeleting}
+                  disabled={isDeleting}
                 >
                   Delete
                 </Button>
               )}
             </div>
           </div>
+          
+          {/* Error display */}
+          {displayErrors.length > 0 && (
+            <div className="mb-6 space-y-4">
+              {displayErrors.map((error, index) => (
+                <ErrorDisplay
+                  key={index}
+                  error={error!}
+                  title="Error"
+                  onDismiss={() => {
+                    if (error === verificationError) setVerificationError(null);
+                    if (error === deleteError) setDeleteError(null);
+                  }}
+                />
+              ))}
+            </div>
+          )}
           
           {/* Review card */}
           <Card padding="lg" className="mb-8">
@@ -143,6 +177,9 @@ const ReviewDetailPage: React.FC = () => {
                   </Badge>
                   <Badge variant="gray">
                     {visibilityLabels[review.visibility] || 'Private'}
+                  </Badge>
+                  <Badge variant="info" size="sm">
+                    {review.blockchain.toUpperCase()}
                   </Badge>
                 </div>
                 
@@ -218,24 +255,18 @@ const ReviewDetailPage: React.FC = () => {
                   leftIcon={<CheckCircle className="h-4 w-4" />}
                   onClick={handleVerify}
                   isLoading={isVerifying}
+                  disabled={isVerifying}
                 >
                   Verify on Blockchain
                 </Button>
               )}
             </div>
             
-            {/* Verification messages */}
+            {/* Success message */}
             {verificationSuccess && (
               <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md flex items-center text-green-700">
                 <CheckCircle className="h-5 w-5 mr-2" />
                 Review successfully verified on the blockchain.
-              </div>
-            )}
-            
-            {verificationError && (
-              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md flex items-center text-red-700">
-                <AlertTriangle className="h-5 w-5 mr-2" />
-                {verificationError}
               </div>
             )}
           </Card>

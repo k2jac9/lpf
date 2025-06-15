@@ -5,7 +5,7 @@ import { PetraWallet } from '@aptos-labs/wallet-adapter-petra';
 import { MartianWallet } from '@aptos-labs/wallet-adapter-martian';
 import { PontemWallet } from '@aptos-labs/wallet-adapter-pontem';
 import { FewchaWallet } from '@fewcha/aptos-wallet-adapter';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { BlockchainProvider } from './context/BlockchainContext';
 import { ReviewProvider } from './context/ReviewContext';
 
@@ -18,11 +18,18 @@ import ReviewDetailPage from './pages/ReviewDetailPage';
 import ReviewFormPage from './pages/ReviewFormPage';
 import VerificationPage from './pages/VerificationPage';
 
-// Protected route component
+// Protected route component that uses real authentication
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  // In a real app, we would check for authentication
-  // For demo, we'll assume user is authenticated
-  const isAuthenticated = true;
+  const { isAuthenticated, isLoading } = useAuth();
+  
+  // Show loading spinner while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
+      </div>
+    );
+  }
   
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
