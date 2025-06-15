@@ -1,5 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { WalletProvider } from '@aptos-labs/wallet-adapter-react';
+import { PetraWallet } from '@aptos-labs/wallet-adapter-petra';
+import { MartianWallet } from '@aptos-labs/wallet-adapter-martian';
+import { PontemWallet } from '@aptos-labs/wallet-adapter-pontem';
 import { AuthProvider } from './context/AuthContext';
 import { BlockchainProvider } from './context/BlockchainContext';
 import { ReviewProvider } from './context/ReviewContext';
@@ -26,66 +30,75 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Configure supported wallets
+const wallets = [
+  new PetraWallet(),
+  new MartianWallet(),
+  new PontemWallet(),
+];
+
 const App: React.FC = () => {
   return (
-    <Router>
-      <AuthProvider>
-        <BlockchainProvider>
-          <ReviewProvider>
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<HomePage />} />
-              <Route path="/login" element={<LoginPage />} />
-              
-              {/* Protected routes */}
-              <Route 
-                path="/dashboard" 
-                element={
-                  <ProtectedRoute>
-                    <DashboardPage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/reviews" 
-                element={
-                  <ProtectedRoute>
-                    <ReviewListPage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/reviews/new" 
-                element={
-                  <ProtectedRoute>
-                    <ReviewFormPage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/reviews/:id" 
-                element={
-                  <ProtectedRoute>
-                    <ReviewDetailPage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/verification" 
-                element={
-                  <ProtectedRoute>
-                    <VerificationPage />
-                  </ProtectedRoute>
-                } 
-              />
-              
-              {/* Fallback route */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </ReviewProvider>
-        </BlockchainProvider>
-      </AuthProvider>
-    </Router>
+    <WalletProvider wallets={wallets} autoConnect={false}>
+      <Router>
+        <AuthProvider>
+          <BlockchainProvider>
+            <ReviewProvider>
+              <Routes>
+                {/* Public routes */}
+                <Route path="/" element={<HomePage />} />
+                <Route path="/login" element={<LoginPage />} />
+                
+                {/* Protected routes */}
+                <Route 
+                  path="/dashboard" 
+                  element={
+                    <ProtectedRoute>
+                      <DashboardPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/reviews" 
+                  element={
+                    <ProtectedRoute>
+                      <ReviewListPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/reviews/new" 
+                  element={
+                    <ProtectedRoute>
+                      <ReviewFormPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/reviews/:id" 
+                  element={
+                    <ProtectedRoute>
+                      <ReviewDetailPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/verification" 
+                  element={
+                    <ProtectedRoute>
+                      <VerificationPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                {/* Fallback route */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </ReviewProvider>
+          </BlockchainProvider>
+        </AuthProvider>
+      </Router>
+    </WalletProvider>
   );
 };
 

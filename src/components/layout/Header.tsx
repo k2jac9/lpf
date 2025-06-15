@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Scale, Menu, X, LogOut, User, FileText, Shield, Bell } from 'lucide-react';
+import WalletConnectButton from '../shared/WalletConnectButton';
 
 const Header: React.FC = () => {
   const { user, logout, isAuthenticated } = useAuth();
@@ -62,7 +63,10 @@ const Header: React.FC = () => {
             </nav>
           </div>
           
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
+            {/* Wallet Connect Button */}
+            <WalletConnectButton size="sm" />
+            
             {isAuthenticated ? (
               <>
                 {/* Notification button */}
@@ -231,6 +235,13 @@ const Header: React.FC = () => {
             >
               Verification
             </Link>
+          </div>
+          
+          {/* Wallet section in mobile menu */}
+          <div className="pt-4 pb-3 border-t border-gray-200">
+            <div className="flex items-center px-4">
+              <WalletConnectButton size="sm" />
+            </div>
           </div>
           
           {isAuthenticated ? (

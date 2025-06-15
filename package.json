@@ -10,6 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@aptos-labs/wallet-adapter-react": "^3.0.0",
+    "@aptos-labs/wallet-adapter-petra": "^0.3.0",
+    "@aptos-labs/wallet-adapter-martian": "^0.0.4",
+    "@aptos-labs/wallet-adapter-pontem": "^0.1.4",
     "@stellar/stellar-sdk": "^11.1.0",
     "aptos": "^1.20.0",
     "date-fns": "^2.30.0",
