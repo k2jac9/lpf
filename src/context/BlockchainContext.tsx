@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AptosClient } from 'aptos';
-import { Server, Keypair, Networks, TransactionBuilder, Account, Operation, BASE_FEE } from '@stellar/stellar-sdk';
+import * as StellarSdk from '@stellar/stellar-sdk';
 import { AptosTransaction, BlockchainNetwork } from '../types';
 
 interface BlockchainContextType {
@@ -32,7 +32,7 @@ export const BlockchainProvider: React.FC<{ children: ReactNode }> = ({ children
   
   // Blockchain clients
   const [aptosClient, setAptosClient] = useState<AptosClient | null>(null);
-  const [stellarServer, setStellarServer] = useState<Server | null>(null);
+  const [stellarServer, setStellarServer] = useState<StellarSdk.Server | null>(null);
 
   useEffect(() => {
     const initializeBlockchainClients = async () => {
@@ -46,7 +46,7 @@ export const BlockchainProvider: React.FC<{ children: ReactNode }> = ({ children
         
         // Initialize Stellar server
         const stellarUrl = import.meta.env.VITE_STELLAR_HORIZON_URL || 'https://horizon.stellar.org';
-        const stellar = new Server(stellarUrl);
+        const stellar = new StellarSdk.Server(stellarUrl);
         setStellarServer(stellar);
         
         setIsInitialized(true);
@@ -110,7 +110,7 @@ export const BlockchainProvider: React.FC<{ children: ReactNode }> = ({ children
         
         // For demo purposes, generate a random keypair
         // In a real implementation, you would integrate with Stellar wallet extensions
-        const keypair = Keypair.random();
+        const keypair = StellarSdk.Keypair.random();
         address = keypair.publicKey();
         
         // Test the connection
@@ -192,12 +192,12 @@ export const BlockchainProvider: React.FC<{ children: ReactNode }> = ({ children
         
         // For demo purposes, create a mock transaction
         // In a real implementation, you would create and submit an actual transaction
-        const mockAccount = new Account(walletAddress, '0');
-        const transaction = new TransactionBuilder(mockAccount, {
-          fee: BASE_FEE,
-          networkPassphrase: Networks.PUBLIC,
+        const mockAccount = new StellarSdk.Account(walletAddress, '0');
+        const transaction = new StellarSdk.TransactionBuilder(mockAccount, {
+          fee: StellarSdk.BASE_FEE,
+          networkPassphrase: StellarSdk.Networks.PUBLIC,
         })
-        .addOperation(Operation.manageData({
+        .addOperation(StellarSdk.Operation.manageData({
           name: `record_${type}_${Date.now()}`,
           value: content.substring(0, 64) // Stellar data values are limited to 64 bytes
         }))
