@@ -4,6 +4,7 @@ import { WalletProvider } from '@aptos-labs/wallet-adapter-react';
 import { PetraWallet } from '@aptos-labs/wallet-adapter-petra';
 import { MartianWallet } from '@aptos-labs/wallet-adapter-martian';
 import { PontemWallet } from '@aptos-labs/wallet-adapter-pontem';
+import { FewchaWallet } from '@fewcha/aptos-wallet-adapter';
 import { AuthProvider } from './context/AuthContext';
 import { BlockchainProvider } from './context/BlockchainContext';
 import { ReviewProvider } from './context/ReviewContext';
@@ -35,6 +36,7 @@ const wallets = [
   new PetraWallet(),
   new MartianWallet(),
   new PontemWallet(),
+  new FewchaWallet(),
 ];
 
 const App: React.FC = () => {
