@@ -36,7 +36,8 @@ const mockReviews: Review[] = [
       clientReference: 'SMJ-2023',
       tags: ['forensic', 'expert testimony', 'civil case']
     },
-    visibility: 'public'
+    visibility: 'public',
+    blockchain: 'aptos'
   },
   {
     id: 'rev_2',
@@ -51,7 +52,8 @@ const mockReviews: Review[] = [
     metadata: {
       tags: ['contract', 'SaaS', 'compliance']
     },
-    visibility: 'private'
+    visibility: 'private',
+    blockchain: 'aptos'
   },
   {
     id: 'rev_3',
@@ -68,7 +70,8 @@ const mockReviews: Review[] = [
       clientReference: 'IP-2023-071',
       tags: ['intellectual property', 'copyright', 'legal opinion']
     },
-    visibility: 'organization'
+    visibility: 'organization',
+    blockchain: 'aptos'
   }
 ];
 
@@ -78,7 +81,7 @@ export const ReviewProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [error, setError] = useState<Error | null>(null);
   
   const { user } = useAuth();
-  const { verifyReview } = useBlockchain();
+  const { createRecord, isInitialized } = useBlockchain();
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -129,6 +132,7 @@ export const ReviewProvider: React.FC<{ children: ReactNode }> = ({ children }) 
           tags: []
         },
         visibility: reviewData.visibility || 'private',
+        blockchain: 'aptos',
       };
       
       // Update state
@@ -200,6 +204,10 @@ export const ReviewProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     const review = getReview(id);
     if (!review) throw new Error('Review not found');
     
+    if (!isInitialized) {
+      throw new Error('Blockchain not initialized. Please wait and try again.');
+    }
+    
     try {
       // Update status to pending
       await updateReview(id, {
@@ -208,13 +216,13 @@ export const ReviewProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       });
       
       // Call blockchain service
-      const transaction = await verifyReview(id, review.content);
+      const transactionHash = await createRecord(review.content, 'review');
       
       // Update with transaction details
       const verifiedReview = await updateReview(id, {
         verificationStatus: 'verified',
         status: 'verified',
-        transactionHash: transaction.hash
+        transactionHash: transactionHash
       });
       
       return verifiedReview;
