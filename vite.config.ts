@@ -5,14 +5,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
-    exclude: [
-      '@aptos-labs/wallet-adapter-react',
-      '@aptos-labs/wallet-adapter-core',
-      '@aptos-labs/wallet-adapter-petra',
-      '@aptos-labs/wallet-adapter-martian',
-      '@aptos-labs/wallet-adapter-pontem',
-      '@fewcha/aptos-wallet-adapter'
-    ]
+    exclude: []
   },
   define: {
     global: 'globalThis',
