@@ -12,7 +12,7 @@
   "dependencies": {
     "@aptos-labs/wallet-adapter-react": "^3.5.5",
     "@aptos-labs/wallet-adapter-core": "^4.13.3",
-    "@aptos-labs/wallet-adapter-petra": "^4.23.0",
+    "@aptos-labs/wallet-adapter-petra": "^3.5.5",
     "@aptos-labs/wallet-adapter-pontem": "^1.0.6",
     "@fewcha/aptos-wallet-adapter": "^0.1.8",
     "@stellar/stellar-sdk": "^12.2.0",
