@@ -1,9 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { WalletProvider } from '@aptos-labs/wallet-adapter-react';
-import { PetraWallet } from '@aptos-labs/wallet-adapter-petra';
-import { PontemWallet } from '@aptos-labs/wallet-adapter-pontem';
-import { FewchaWallet } from '@fewcha/aptos-wallet-adapter';
+import { AptosWalletAdapterProvider } from '@aptos-labs/wallet-adapter-react';
+import { PetraWallet } from 'petra-plugin-wallet-adapter';
+import { PontemWallet } from 'pontem-wallet-adapter';
+import { FewchaWallet } from 'fewcha-plugin-wallet-adapter';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { BlockchainProvider } from './context/BlockchainContext';
 import { ReviewProvider } from './context/ReviewContext';
@@ -46,7 +46,13 @@ const wallets = [
 
 const App: React.FC = () => {
   return (
-    <WalletProvider wallets={wallets} autoConnect={false}>
+    <AptosWalletAdapterProvider 
+      plugins={wallets} 
+      autoConnect={false}
+      onError={(error) => {
+        console.error('Wallet adapter error:', error);
+      }}
+    >
       <Router>
         <AuthProvider>
           <BlockchainProvider>
@@ -105,7 +111,7 @@ const App: React.FC = () => {
           </BlockchainProvider>
         </AuthProvider>
       </Router>
-    </WalletProvider>
+    </AptosWalletAdapterProvider>
   );
 };
 
