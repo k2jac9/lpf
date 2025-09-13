@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wallet, ChevronDown, AlertCircle } from 'lucide-react';
+import { Wallet, ChevronDown, AlertCircle, Check } from 'lucide-react';
 import { useBlockchain } from '../../context/BlockchainContext';
 import Button from './Button';
 import Badge from './Badge';
@@ -53,7 +53,6 @@ const WalletConnectButton: React.FC<WalletConnectButtonProps> = ({
       await connectWallet();
     } catch (err) {
       console.error('Failed to connect wallet:', err);
-      // Error is already set in context
     } finally {
       setIsConnecting(false);
     }
@@ -80,20 +79,6 @@ const WalletConnectButton: React.FC<WalletConnectButtonProps> = ({
   const formatAddress = (address: string) => {
     if (address.length < 10) return address;
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
-  };
-
-  const getButtonVariant = () => {
-    if (error) return 'danger';
-    if (!isInitialized) return 'outline';
-    return variant;
-  };
-
-  const getButtonText = () => {
-    if (!isInitialized) return 'Initializing...';
-    if (error) return 'Error';
-    if (isConnecting) return 'Connecting...';
-    if (!isConnected) return 'Connect Wallet';
-    return walletAddress ? formatAddress(walletAddress) : 'Connected';
   };
 
   if (!isInitialized) {
@@ -144,15 +129,15 @@ const WalletConnectButton: React.FC<WalletConnectButtonProps> = ({
   return (
     <div className="relative" ref={dropdownRef}>
       <Button
-        variant={getButtonVariant()}
+        variant="outline"
         size={size}
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         className={`${className} flex items-center space-x-2`}
         disabled={isConnecting}
       >
         <div className="flex items-center space-x-2">
-          <Wallet className="h-4 w-4" />
-          <span>{getButtonText()}</span>
+          <Check className="h-4 w-4 text-green-500" />
+          <span>{walletAddress ? formatAddress(walletAddress) : 'Connected'}</span>
           <Badge variant="success" size="sm">
             {network.toUpperCase()}
           </Badge>
