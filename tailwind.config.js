@@ -10,7 +10,7 @@ export default {
           200: '#A3BFE0',
           300: '#759FD0',
           400: '#477FC1',
-          500: '#1A365D', // Main primary color
+          500: '#1A365D',
           600: '#152D4F',
           700: '#112440',
           800: '#0D1A2F',
@@ -22,7 +22,7 @@ export default {
           200: '#FBE1B4',
           300: '#F8D28E',
           400: '#F6C269',
-          500: '#C69214', // Main secondary color
+          500: '#C69214',
           600: '#A57911',
           700: '#84610E',
           800: '#63480A',
@@ -62,10 +62,6 @@ export default {
           900: '#111827',
         },
       },
-      spacing: {
-        '128': '32rem',
-        '144': '36rem',
-      },
       fontFamily: {
         sans: [
           'Inter',
@@ -97,4 +93,4 @@ export default {
     },
   },
   plugins: [],
-};
+}

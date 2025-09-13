@@ -24,15 +24,8 @@ interface BlockchainContextType {
 
 const BlockchainContext = createContext<BlockchainContextType | undefined>(undefined);
 
-// Get environment variables with fallbacks
-const getEnvVar = (key: string, fallback: string): string => {
-  return import.meta.env[key] || fallback;
-};
-
 export const BlockchainProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [network, setNetwork] = useState<BlockchainNetwork>(
-    (getEnvVar('VITE_DEFAULT_NETWORK', 'aptos') as BlockchainNetwork) || 'aptos'
-  );
+  const [network, setNetwork] = useState<BlockchainNetwork>('aptos');
   const [isVerifying, setIsVerifying] = useState(false);
   const [latestTransaction, setLatestTransaction] = useState<AptosTransaction | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -45,7 +38,6 @@ export const BlockchainProvider: React.FC<{ children: ReactNode }> = ({ children
     wallet: aptosWallet,
     connect: aptosConnect, 
     disconnect: aptosDisconnect,
-    signAndSubmitTransaction 
   } = useWallet();
   
   // Blockchain clients
@@ -64,29 +56,28 @@ export const BlockchainProvider: React.FC<{ children: ReactNode }> = ({ children
         setError(null);
         console.log('Initializing blockchain clients...');
         
-        // Initialize Aptos client with new SDK
-        const config = new AptosConfig({ network: Network.TESTNET });
+        // Initialize Aptos client
+        const config = new AptosConfig({ 
+          network: Network.TESTNET,
+          fullnode: 'https://fullnode.testnet.aptoslabs.com/v1',
+        });
         const aptos = new Aptos(config);
         setAptosClient(aptos);
         
-        console.log('Aptos client connected successfully');
+        console.log('Aptos client initialized');
         
         // Initialize Stellar server
-        const stellarUrl = getEnvVar('VITE_STELLAR_HORIZON_URL', 'https://horizon-testnet.stellar.org');
-        const stellar = new StellarSdk.Server(stellarUrl);
+        const stellar = new StellarSdk.Server('https://horizon-testnet.stellar.org');
         setStellarServer(stellar);
         
-        console.log('Stellar client connected successfully');
+        console.log('Stellar client initialized');
         
         setIsInitialized(true);
-        console.log('Blockchain clients initialized successfully');
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to initialize blockchain clients';
         setError(errorMessage);
         console.error('Error initializing blockchain clients:', err);
-        
-        // Still mark as initialized to allow the app to function with limited capabilities
-        setIsInitialized(true);
+        setIsInitialized(true); // Still allow app to function
       }
     };
 
@@ -94,14 +85,13 @@ export const BlockchainProvider: React.FC<{ children: ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    const checkConnection = async () => {
+    const checkConnection = () => {
       try {
         const savedNetwork = localStorage.getItem('blockchain_network') as BlockchainNetwork;
         if (savedNetwork && (savedNetwork === 'aptos' || savedNetwork === 'stellar')) {
           setNetwork(savedNetwork);
         }
         
-        // Check Stellar connection from localStorage
         if (savedNetwork === 'stellar') {
           const stellarConnectedLocal = localStorage.getItem('stellar_connected') === 'true';
           const stellarAddressLocal = localStorage.getItem('stellar_address');
@@ -120,41 +110,35 @@ export const BlockchainProvider: React.FC<{ children: ReactNode }> = ({ children
     }
   }, [isInitialized]);
 
-  // Computed values based on current network
+  // Computed values
   const isConnected = network === 'aptos' ? aptosConnected : stellarConnected;
   const walletAddress = network === 'aptos' 
-    ? (aptosAccount?.address ? `${aptosAccount.address}` : null)
+    ? aptosAccount?.address?.toString() || null
     : stellarAddress;
   const walletName = network === 'aptos' ? aptosWallet?.name || null : 'Stellar Wallet';
 
   const connectWallet = async (): Promise<string> => {
     if (!isInitialized) {
-      throw new Error('Blockchain clients not initialized. Please wait and try again.');
+      throw new Error('Blockchain clients not initialized');
     }
 
     try {
       setError(null);
       
       if (network === 'aptos') {
-        // Connect using Aptos wallet adapter
         if (!aptosConnected) {
           await aptosConnect();
         }
         
         if (!aptosAccount?.address) {
-          throw new Error('Failed to get wallet address after connection');
+          throw new Error('Failed to get wallet address');
         }
         
-        const address = `${aptosAccount.address}`;
+        const address = aptosAccount.address.toString();
         console.log('Connected to Aptos wallet:', address);
         return address;
       } else {
-        // Stellar wallet connection (demo implementation)
-        if (!stellarServer) {
-          throw new Error('Stellar server not initialized');
-        }
-        
-        // For demo purposes, generate a random keypair
+        // Stellar demo implementation
         const keypair = StellarSdk.Keypair.random();
         const address = keypair.publicKey();
         
@@ -170,7 +154,6 @@ export const BlockchainProvider: React.FC<{ children: ReactNode }> = ({ children
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to connect wallet';
       setError(errorMessage);
-      console.error('Error connecting wallet:', err);
       throw new Error(errorMessage);
     }
   };
@@ -214,72 +197,34 @@ export const BlockchainProvider: React.FC<{ children: ReactNode }> = ({ children
     }
   };
 
-  const generateContentHash = (content: string): string => {
-    let hash = 0;
-    for (let i = 0; i < content.length; i++) {
-      const char = content.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
-    }
-    return Math.abs(hash).toString(16);
-  };
-
   const createRecord = async (content: string, type: 'review' | 'cle'): Promise<string> => {
     if (!isConnected || !walletAddress) {
       throw new Error('Please connect your wallet first');
-    }
-
-    if (!isInitialized) {
-      throw new Error('Blockchain clients not initialized. Please wait and try again.');
     }
 
     try {
       setError(null);
       setIsVerifying(true);
       
-      if (network === 'aptos') {
-        if (!aptosClient) {
-          throw new Error('Aptos client not initialized');
-        }
-        
-        // For demo purposes, create a simple transaction
-        // In production, you would call your smart contract
-        const mockTxHash = `0x${Array(64).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('')}`;
-        console.log('Mock transaction hash for demo:', mockTxHash);
-        
-        const transaction: AptosTransaction = {
-          hash: mockTxHash,
-          sender: walletAddress,
-          timestamp: new Date(),
-          status: 'success',
-          blockHeight: Math.floor(Math.random() * 1000000) + 100000,
-          gasUsed: Math.floor(Math.random() * 1000) + 100,
-        };
-        setLatestTransaction(transaction);
-        
-        return mockTxHash;
-      } else {
-        // Stellar implementation
-        const mockAccount = new StellarSdk.Account(walletAddress, '0');
-        const transaction = new StellarSdk.TransactionBuilder(mockAccount, {
-          fee: StellarSdk.BASE_FEE,
-          networkPassphrase: StellarSdk.Networks.TESTNET,
-        })
-        .addOperation(StellarSdk.Operation.manageData({
-          name: `record_${type}_${Date.now()}`,
-          value: content.substring(0, 64)
-        }))
-        .setTimeout(30)
-        .build();
-        
-        const txHash = transaction.hash().toString('hex');
-        console.log('Record created on Stellar blockchain:', txHash);
-        return txHash;
-      }
+      // Generate mock transaction hash for demo
+      const mockTxHash = `0x${Array(64).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('')}`;
+      
+      const transaction: AptosTransaction = {
+        hash: mockTxHash,
+        sender: walletAddress,
+        timestamp: new Date(),
+        status: 'success',
+        blockHeight: Math.floor(Math.random() * 1000000) + 100000,
+        gasUsed: Math.floor(Math.random() * 1000) + 100,
+      };
+      
+      setLatestTransaction(transaction);
+      console.log('Mock transaction created:', mockTxHash);
+      
+      return mockTxHash;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create record on blockchain';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create record';
       setError(errorMessage);
-      console.error('Error creating record:', err);
       throw new Error(errorMessage);
     } finally {
       setIsVerifying(false);
@@ -287,37 +232,20 @@ export const BlockchainProvider: React.FC<{ children: ReactNode }> = ({ children
   };
 
   const verifyRecord = async (recordId: string): Promise<boolean> => {
-    if (!isInitialized) {
-      throw new Error('Blockchain clients not initialized');
-    }
-
     try {
       setError(null);
-      
-      if (network === 'aptos') {
-        // For demo purposes, return true for valid-looking hashes
-        return recordId.startsWith('0x') && recordId.length === 66;
-      } else {
-        // For demo purposes, return true for valid-looking Stellar hashes
-        return recordId.length === 64;
-      }
+      return recordId.startsWith('0x') && recordId.length === 66;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to verify record';
       setError(errorMessage);
-      console.error('Error verifying record:', err);
       return false;
     }
   };
 
   const getVerificationStatus = async (transactionHash: string): Promise<AptosTransaction> => {
-    if (!isInitialized) {
-      throw new Error('Blockchain clients not initialized');
-    }
-
     try {
       setError(null);
       
-      // Return mock data for demo
       const mockTransaction: AptosTransaction = {
         hash: transactionHash,
         sender: walletAddress || '0x1',
@@ -332,7 +260,6 @@ export const BlockchainProvider: React.FC<{ children: ReactNode }> = ({ children
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to get verification status';
       setError(errorMessage);
-      console.error('Error checking transaction:', err);
       throw new Error(errorMessage);
     }
   };

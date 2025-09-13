@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AptosWalletAdapterProvider } from '@aptos-labs/wallet-adapter-react';
 import { PetraWallet } from 'petra-plugin-wallet-adapter';
 import { PontemWallet } from 'pontem-wallet-adapter';
-import { FewchaWallet } from 'fewcha-plugin-wallet-adapter';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { BlockchainProvider } from './context/BlockchainContext';
 import { ReviewProvider } from './context/ReviewContext';
@@ -17,11 +16,10 @@ import ReviewDetailPage from './pages/ReviewDetailPage';
 import ReviewFormPage from './pages/ReviewFormPage';
 import VerificationPage from './pages/VerificationPage';
 
-// Protected route component that uses real authentication
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+// Protected route component
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
   
-  // Show loading spinner while checking authentication
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -41,7 +39,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const wallets = [
   new PetraWallet(),
   new PontemWallet(),
-  new FewchaWallet(),
 ];
 
 const App: React.FC = () => {
