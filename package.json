@@ -13,7 +13,6 @@
     "@aptos-labs/wallet-adapter-react": "^3.0.0",
     "@aptos-labs/wallet-adapter-core": "^4.0.0",
     "@aptos-labs/wallet-adapter-petra": "^0.3.0",
-    "@aptos-labs/wallet-adapter-martian": "^0.1.0",
     "@aptos-labs/wallet-adapter-pontem": "^0.1.4",
     "@fewcha/aptos-wallet-adapter": "^0.1.0",
     "@stellar/stellar-sdk": "^11.1.0",
