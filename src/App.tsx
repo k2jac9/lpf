@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { WalletProvider } from '@aptos-labs/wallet-adapter-react';
-import { PetraWallet } from '@aptos-labs/petra-plugin-wallet-adapter';
+import { PetraWallet } from '@aptos-labs/wallet-adapter-petra';
 import { MartianWallet } from '@aptos-labs/wallet-adapter-martian';
 import { PontemWallet } from '@aptos-labs/wallet-adapter-pontem';
 import { FewchaWallet } from '@fewcha/aptos-wallet-adapter';
